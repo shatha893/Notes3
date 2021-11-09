@@ -273,7 +273,7 @@ use the 1.4.1 version of the generator. (Use arrow keys)  --- I can only view on
 * We also have something called a "Slider Control". We have to import "PropertyPaneSlider" from '@microsoft/sp-property-pane'.  
 
 
-* The proparty pane choice group we can create by importing sth like previously.
+* The property pane choice group we can create by importing sth like previously.
     ```typescript
     PropertyPaneChoiceGroup([PROPERTY NAME],{
         label: [STRING],
