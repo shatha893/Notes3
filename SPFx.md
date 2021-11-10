@@ -59,8 +59,23 @@
 * It does not transcompile to web assembly, it does so to vanilla JS.
 * WebAssembly (aka Wasm) it's an open standard that defines a portable binary-code format for executable programs. 
 
+## What is SPPNP (SharePoint Patterns and Practices or maybe not?)?   
+
+
+## How to create a list on SharePoint?   
+
+* In this page that is viewed after you choose the site you want to edit choose the option `New` then `list` this will create a list that you can CRUD inside using either ways we talked about whether it was the pnp or the sphttpclient.
+
+    <img src="screenshots\screenshot_1.png">   
+
+## GUID   
+* An internal ID number used in the database. The GUID element generates a globally unique identifier.
+* The guy put it in a file that he called `elements.xml` and he created this file in and after creating the folder `sharepoint` and then inside it the folder `assets`. 
+* Inside the file `elements.xml` we put xml code that I'm not sure what means 
+
 <br/><br/>
 
+<!-- Video 47 !!!! -->
 # Section 1  
 
 ## Introduction on SPFx
@@ -461,7 +476,8 @@ use the 1.4.1 version of the generator. (Use arrow keys)  --- I can only view on
     * In the manifest file we have a json object property called "officeFabricIconFontName" which is "page" by default.   
     * When we change the name of the icon in this option the icon changes but we have to get the name from the icons available on the website "Fabric ui".  
     * We can also use any image we want by replacing the option "officeFabricIconFontName" into "iconImageUrl" and we give it the value as the link of the image.  
-    * Or We can use an image but in base64 by converting the image into base64 on this website **https://www.base64-image.de/**
+    * Or We can use an image but in base64 by converting the image into base64 on this website **https://www.base64-image.de/**.  
+
 * What *is* that for God's sake!?   
     It seems like it's the icon of the website.
 
@@ -485,4 +501,287 @@ use the 1.4.1 version of the generator. (Use arrow keys)  --- I can only view on
 
 * Create a new site using sphttpclient  
     * Which means to make the UI that allows users to create a website
+
+* When creating a subsite I need to make a constant in a "createSubSite" function:   
+```typescript
+const spHttpClientOptions: ISPHttpClientOptions = {
+    body: `{
+        "parameters" : {
+            "@odata.type": "SP.WebInfoCreationInformation",
+            "Title": "${subSiteTitle}",
+            "Url": "${subSiteUrl}",
+            "Description":"${subSiteDescription}",
+            "Language":1033,
+            "WebTemplate":"STS#0",
+            "UseUniquePermissions":true
+        }
+    }`
+};
+```   
+* The values inside the body object are reserved and should be included each time.  
+* So after this we need to make a post request as follows:  
+    ```typescript
+    this.context.spHttpClient.port(url,SPHttpClient.configurations.v1,spHttpClientOptions)
+        .then((response:SPHttpClientResponse) => {
+            if(response.status == 200){
+                alert("Site created successfully");
+            }else{
+                alert("Error");
+            }
+        })
+    ```   
+
+# Section 6 CRUD Operations with NoJavascript Framework  
+
+* Most crucial import statement is  
+    ```typescript
+    import { ISPHttpClientOptions, SPHttpClient, SPHttpClientResponse } from '@microsoft/sp-http';
+    ```   
+* So we're creating a form that would be used to create a list item.
+
+* We can bind an event with an html component by **creating** a function like so  
+    ```typescript
+    private _bindEvents(): void{
+        this.domElement.querySelector('[ID OF THE HTML COMPONENT]').addEventListener('click', ()=>{this.FUNCTION_TO_GET_CALLED();});
+    }
+    ```   
+
+* To get the value of the html components we can do the following:  
+
+    ```typescript
+    private addListItem(): void{
+        var VARIABLE_NAME = document.getElementById("[ID OF COMPONENT]")["value"];
+    }
+    ```
+
+* To make the restful api after getting the values we do the following  
+
+    ```typescript   
+    const siteurl: string = this.context.pageContext.site.absoluteUrl + "/_api/web/lists/getbytitle('SoftwareCatalog')/items";   //What is "getbytitle('softwarecataloge')"
+    const itemBody: any = {
+        "VARIABLE_NAME": VARIABLE_NAME
+    }
+    ```  
+* In the `"VARIABLE_NAME"` above we have to make sure that the name is the same as the one in the lists in the catalog on SharePoint.  
+
+* We then create a constant that has the itemBody we've written above but stringified:  
+    ```typescript
+    const spHttpClientOptions: ISPHttpClientOptions = {
+        "body": JSON.stringify(itemBody)
+    };
+    ```   
+
+* Then the post statement:  
+    ```typescript
+    this .context.spHttpClient.post(siteurl, SPHttpClient.configurations.v1, spHttpClientOptions)
+        .then((response:SPHttpClientResponse) => {
+            if(response.status === 201){
+                let statusMessage: Element = this.domElement.querySelector('#[ID]');
+                statusMessage.innerHTML = 'List created successfully';
+                this.clear();//find out what this function does?
+            }
+        })
+    ```
+
+* Each request post, get or whatever will need to use the same values so we can make an interface and put them in it to make it reusable.
+
+* To **read** we do the following:  
+
+    * Put this line in the function `_bindEvents()`: `this.domElement.querySelector('#btnRead').addEventListener('click', () => { this.readListItem();});`.    
+
+
+    * The `readListItem` body is as follows:  
+        ```typescript
+        private readListItem(): void{
+            let id: string= document.getElementById("txtID")["value"];
+            this._getListItemByID(id).then(listItem =>{
+                //Then we give each element a value  
+                document.getElementById("[ID]")["value"] = listItem.Title;
+
+            })
+        }
+
+        private _getListItemByID(id: string): Promise<ISoftwareListItem> // Where the ISoftwareListItem is the interface we created for the values we crud
+        {
+            const url: string = this.context.pageContext.site.absoluteUrl+"/_api/web/lists/getbytitle('SoftwareCatalog')/items?$filter=Id eq"+id;
+            return this.context.spHttpClient.get(url, SPHttpClient.configurations.v1)
+            .then((response:SPHttpClientResponse) => {
+                return response.json();
+            })
+            .then( (listItems:any) => {
+                const untypedItem:any = listItems.value[0];
+                const listItem: ISoftwareListItem = untypedItem as ISoftwareListItem;
+                return listItem;
+            }) as Promise <ISoftwareListItem>;
+        }
+        ```
+    * When making a get request we have to give it the following parameters *the url*, *the configurations*, *the options*.  
+
+* The **update** listItem   
+    * Add this in the `_bindEvents()` function `this.domElement.querySelector('[BTN ID]').addEventListener('click', () => {this.updateListItem();});`
+    * Then we create an `updateListItem()` function:  
+        ```typescript
+        private updateListItem(): void{
+            const url: string = this.context.pageContext.site.absoluteUrl + '/_api/web/lists/getbytitle("SoftwareCatalog")/items('+id+')';  
+            const itemBody: any={
+                "Title": title,
+                "SoftwareVendor": softwareVendor,
+                "SoftwareDescription":softwareDescription,
+                "SoftwareName": softwareName,
+                "SoftwareVersion": softwareVersion
+            };
+            const headers: any = {
+                "X-HTTP-Method": "MERGE",
+                "IF-MATCH": "*"
+            }  
+            const spHttpClientOptions: ISPHttpClientOptions = {
+                "headers": headers,
+                "body": JSON.stringify(itemBody)
+            };  
+
+            this.context.spHttpClient.post(url, SPHttpClient.configurations.v1, spHttpClientOptions)
+            .then((response:SPHttpClientResponse) => {
+                if(response.status == 204){
+                    let message: Element = this.domElement.querySelector('#[ID]');
+                    message.innerHTML = "List Item has been updated successfully";
+                }  else{
+                    let message: Element = this.domElement.querySelector('#[ID]');  
+                    message.innerHTML = "List Item updation failed"+response.status+" - "+response.statusText; 
+                }
+
+            })
+        }
+        ```
+
+* The **delete** listItem   
+    * Add the following to the `_bindEvents()` function: `this.domElement.querySelector('[BTN ID]').addEventListener('click', () => {this.deleteListItem(); });`.
+
+    * Create `updateListItem` function:  
+        ```typescript
+        private deleteListItem(): void {
+            let id: string = document.getElementById("[ID]")["value"];
+            const url: string = this.context.pageContext.site.absoluteUrl + "/_api/web/lists/getbytitle('SoftwareCatalog')/items("+id+")";
+            // In the update the method was called "MERGE" and here it's "DELETE"
+            const headers: any = { "X-HTTP-Method": "DELETE", "IF-MATCH": "*"};
+
+            const spHttpClientOptions: ISPHttpClientOptions = {
+                "headers":headers
+            };
+
+            this.context.spHttpClient.post(url, SPHttpClient.configuration.v1, spHttpClientOptions)
+                .then((response: SPHttpClientResponse) => {
+                    if(response.status === 204)
+                    {let message: Element = this.domElement.querySelector('[ELEMENT ID]');
+                    message.innerHTML = "Delete: List Item has been deleted successfully.";
+                    this.readAllItems();}
+                    else{
+                        let message: Element = this.domElement.querySelector("[ELEMENT ID]");
+                        message.innerHTML = "Failed to Delete" + response.status + " - " + response.statusText;
+                    }
+                })
+        }
+        ```   
+
+* How to **read all records** in a list  
+    ```typescript
+    private _getListItems(): Promise<ISoftwareListItem[]> {
+        const url string = this.context.pageContext.site.absoluteUrl+"/_api/web/lists/getbytitle('SoftwareCatalog')/items";
+        return this.context.spHttpClient.get(url,SPHttpClient.configurations.v1)
+            .then(response => {
+                return response.json();
+            })
+            .then(json => {
+                return json.value;
+            }) as Promise<ISoftwareListItem[]>;
+    }
+    ```   
+
+* Then we create function `readAllItems`  
+    ```typescript
+    private readAllItems():void{
+        this._getListItems().then(listItems => {
+            let html: string = '<table border=1 width=100% style="border-collapse: collapse;">';
+            html += '<th>Title</th> <th>Vendor</th><th>Description</th><th>Name</th><th>Version</th>';  
+
+            listItems.forEach(listItem => {
+                html += `<tr>
+                <td>${listItem.Title}</td>
+                <td>${listItem.SoftwareVendor}</td>
+                //etc...
+                </tr>`;
+            });  
+            html += '</table>';
+            const listContainer: Element = this.domElement.querySelector('[ID]');
+            listContainer.innerHTML = html;
+        });
+    }
+    ```  
+
+# Section 7 CRUD Operations with sp-pnp-js Library  
+
+* We can install `sp-pnp-js` with this command  `npm install sp-pnp-js --save`.  
+* We use the command `npm shrinkwrap` to shrink lock the dependencies of the solution.
+* Then we import it as follows `import * as pnp from 'sp-pnp-js';`.  
+
+* The difference between this and the sphttpclient way is 
+    * To **add** an entry:
+    ```typescript
+    pnp.sp.web.lists.getByTitle("SoftwareCatalog").items.add({
+      Title: softwaretitle,
+      SoftwareVendor: softwarevendor,
+      SoftwareName: softwarename,
+      SoftwareVersion: softwareversion,
+      SoftwareDescription: softwareDescription,
+      
+    }).then(r => {
      
+      alert("success");
+
+    }); 
+    ```
+
+    * To **read** an entry:  
+    ```typescript
+    const id = document.getElementById("txtID")["value"];
+
+    pnp.sp.web.lists.getByTitle("SoftwareCatalog").items.getById(id).get().then((item: any) => {
+      document.getElementById("txtSoftwareTitle")["value"] = item["Title"];
+      document.getElementById("txtSoftwareName")["value"] = item["SoftwareName"];
+      document.getElementById("txtSoftwareVersion")["value"] = item["SoftwareVersion"];
+      document.getElementById("txtSoftwareDescription")["value"] = item["SoftwareDescription"];      
+      document.getElementById("ddlSoftwareVendor")["value"] = item["SoftwareVendor"];
+      
+    });
+    ```   
+
+    * To **update** an entry:    
+    ```typescript
+    private updateListItem(): void{
+        var title = document.getElementById("[ID]")["value"];
+        //I take the values of each element 
+        var softwareVendor = document.getElementById("ddlSoftwareVendor")["value"];
+        var softwareDescription = document.getElementById("txtSoftwareDescription")["value"];
+        var softwareName = document.getElementById("txtSoftwareName")["value"];
+        var softwareVersion = document.getElementById("txtSoftwareVersion")["value"];
+        
+
+        let id: number = document.getElementById("txtID")["value"];
+
+        pnp.sp.web.lists.getByTitle("SoftwareCatalog").items.getById(id).update({
+        Title: title,
+        SoftwareVendor: softwareVendor,
+        SoftwareName: softwareName,
+        SoftwareDescription: softwareDescription,
+        SoftwareVersion: softwareVersion        
+        }).then(r => {
+        
+        alert("Details Updated");
+
+        });
+
+    }
+    ```
+
+# Section 8 Creating SharePoint Artefacts  
+
+* Provision Assets??
