@@ -61,6 +61,34 @@
 
 ## What is SPPNP (SharePoint Patterns and Practices or maybe not?)?   
 
+## What do we mean by provisioning assets?  
+* Site Provisioning: is a process of creating SharePoint sites *programmatically* to meet business requirements. Plus, it helps with maintaining the site.
+
+## What do we mean by SharePoint Artifacts?
+* Artifacts refers to items that are typically deployed to a SharePoint environment.
+* Artifacts typically include:
+    * JS Files.
+    * CSS Files.
+    * Image Files (.jpg, .gif, .png, etc).
+    * Master Pages.
+    * Page Layouts.
+    * List Items.
+
+## What is the point of the `Site Assets Library` that should exist in every Sharepoint site?  
+* Anytime you upload a company logo to the site, the default location is set to to Site Assets Library. While you can change the location it's *recommended* to keep it as is for consistency reasons.  
+* When creating a new "Team Site", the site automatically contains a OneNote notebook which is stored in the Site Assets Library.
+ 
+
+## What does the gulp bundle and build do?  
+* I think we bundle or package the project so that we can deploy it and drag/drop it in the application catalog on the SharePoint online.
+
+
+## What is an app catalog?
+* I'm putting the sppkg file in the app catalog.
+* We `gulp build` before we package as written below.
+* What is the sppkg file anyway? I think it's the file created after we write the command `gulp package-solution`. We use it to deploy the project to the tennant site.   
+
+## What is Deploying generally and what is it with regards to SharePoint specifically?
 
 ## How to create a list on SharePoint?   
 
@@ -73,9 +101,23 @@
 * The guy put it in a file that he called `elements.xml` and he created this file in and after creating the folder `sharepoint` and then inside it the folder `assets`. 
 * Inside the file `elements.xml` we put xml code that I'm not sure what means 
 
+
+## What can we include int he elements.xml file?  
+* We can provision the following with the SPFx solution package  
+    * Document Library (ListInstance).
+    * Custom Lists (ListInstance).
+    * Custom List and Libarary Schemas (CustomSchema).
+    * Web and List PropertyBag properties (PropertyBag).
+    * Site Columns(Field).
+    * Content Types (ContentType).
+    * Images and other types of files e.g. xlsx, .docx templates (Module).
+    * Custom Actions (CustomAction).
+    * Modern Site pages with even our custom SPFx Client side webparts predefined on them (Module).
+    * Old Wiki Pages and Web Part Pages (Module).
+    * Pre-populated list and library items as part of the ListInstance or CustomSchema, but please do not do it. If you ever re-activate that feature the pre-populated data would double.
+
 <br/><br/>
 
-<!-- Video 47 !!!! -->
 # Section 1  
 
 ## Introduction on SPFx
@@ -782,6 +824,21 @@ const spHttpClientOptions: ISPHttpClientOptions = {
     }
     ```
 
-# Section 8 Creating SharePoint Artefacts  
+# Section 8 Creating SharePoint Artifacts  
 
-* Provision Assets??
+* We create a folder called `sharepoint`, then a folder inside of it called `assets` and inside this folder we create an `elements.xml` file that I guess is where we provision assets. 
+* It's said that it's recommended that we not create more than one `elements.xml` file.  
+
+# Section 9  Working with Libraries
+
+* A library is a class that contains a bunch of functions. 
+* In the videos he made a `getCurrentTime()` function.
+
+* The file `index.js` exports our library.
+
+* We can create a library instead of a Webpart when typing the command `yo @microsoft/sharepoint`.  
+
+* When we want a web part to work in a library we make a *symbolic link* using this command `npm link [LIBRARY NAME]`. 
+* Since libraries are like classes, when we link the web part with the library we can use the functions of the library.  
+
+* To have Full Width layout we set the value of `"supportsFullBleed"` to true in the manifest file. This gives the ability when making a page to put this webpart as full length
