@@ -114,7 +114,11 @@
     * Custom Actions (CustomAction).
     * Modern Site pages with even our custom SPFx Client side webparts predefined on them (Module).
     * Old Wiki Pages and Web Part Pages (Module).
-    * Pre-populated list and library items as part of the ListInstance or CustomSchema, but please do not do it. If you ever re-activate that feature the pre-populated data would double.
+    * Pre-populated list and library items as part of the ListInstance or CustomSchema, but please do not do it. If you ever re-activate that feature the pre-populated data would double.  
+
+## How to open the App Catalog?  
+* See this <a href="https://m365x461244-admin.sharepoint.com/_layouts/15/online/AdminHome.aspx#/classicFeatures">link</a>.
+* Then click on Apps.
 
 <br/><br/>
 
@@ -841,4 +845,20 @@ const spHttpClientOptions: ISPHttpClientOptions = {
 * When we want a web part to work in a library we make a *symbolic link* using this command `npm link [LIBRARY NAME]`. 
 * Since libraries are like classes, when we link the web part with the library we can use the functions of the library.  
 
-* To have Full Width layout we set the value of `"supportsFullBleed"` to true in the manifest file. This gives the ability when making a page to put this webpart as full length
+* To have Full Width layout we set the value of `"supportsFullBleed"` to true in the manifest file. This gives the ability when making a page to put this webpart as full length  
+
+# MS Graph Task  
+
+### To start with it we put this command after creating the webpart  `npm install @microsoft/microsoft-graph-types --save-dev`. 
+* This will install the dependency in our project.  
+
+* Inside the props file put the following  
+  ```typescript
+  import { WebPartContext } from '@microsoft/sp-webpart-base';
+
+  export interface interface-name{
+      description:string;
+      context:WebPartContext;
+  }
+  ```  
+  * Create a new file that ends with the word 'state' that will store all the events.
