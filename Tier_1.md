@@ -71,4 +71,6 @@ P@s5w0rd!
 sudo /bin/vi /etc/postgresql/11/main/pg_hba.conf :set shell=/bin/sh
 :shell
 
+* To scan for UDP ports with nmap write the following `sudo nmap -Pn -sV -sU 10.129.126.250 `
+
 
