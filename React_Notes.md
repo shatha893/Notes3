@@ -107,6 +107,47 @@ It provides data to components no matter how deep they are in the components tre
       }
       ```  
 
-    * Component lifecycle with useEffect()
+    * Component lifecycle with useEffect(). How does useEffect substitute component lifecycle methods  
+
+      * For componentDidMount
+      * Use an empty dependency array to invoke a side-effect once after component mounting  
+        ```javascript
+        import { useEffect } from 'react';
+        function Greet({ name }) {
+          const message = `Hello, ${name}!`;
+          useEffect(() => {
+            // Runs once, after mounting
+            document.title = 'Greetings page';
+          }, []);
+          return <div>{message}</div>;
+        }
+        ``` 
+
+      * For componentDidUpdate  
+      * Each time a side-effect uses props or state values, you must indicate these values as dependencies  
+        ```javascript
+        import { useEffect } from 'react';
+        function MyComponent({ prop }) {
+          const [state, setState] = useState();
+          useEffect(() => {
+            // Side-effect uses `prop` and `state`
+          }, [prop, state]);
+          return <div>....</div>;
+        }
+        ```  
+      * The callback function in the useEffect is invoked after the changes are being committed to DOM and if and only if the dependencies array [prop, state] has changed.
+      * When using the dependencies argument of useEffect() you control when to invoke the side-effect, independently from the rendering cycles of the component. *That's the essence of useEffect() hook*.   
+      * For Side-effect cleanup  
+        * Some side-effects need cleanup (e.g. close a socket, clear timers).  
+        * if the callback returns a function then `useEffect()` considers this as an effect cleanup  
+
+        ```javascript
+        useEffect(() => {
+          // Side-effect...
+          return function cleanup() {
+            // Side-effect cleanup...
+          };
+        }, dependencies);
+        ```
 
     
